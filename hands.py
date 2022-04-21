@@ -11,6 +11,11 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
 
+left_hand_y = 0
+left_hand_x = 0
+right_hand_x = 0
+right_hand_y = 0
+
 # For webcam input:
 cap = cv2.VideoCapture(0)
 with mp_hands.Hands(
@@ -34,50 +39,35 @@ with mp_hands.Hands(
     image.flags.writeable = True
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     image_height, image_width, _ = image.shape
+    
     if results.multi_hand_landmarks:
       for hand_landmarks in results.multi_hand_landmarks:
         # x,y pos of finger tip
+        x = int(hand_landmarks.landmark[8].x * image_width)
+        y = int(hand_landmarks.landmark[8].y * image_height)
         print(
-          f'Index finger tip coordinates: (',
-          f'{hand_landmarks.landmark[8].x * image_width}, '
-          f'{hand_landmarks.landmark[8].y * image_height})'
+          f'x:{x}, '
+          f'y:{y}'
         )
-        
-        # drawing ur whole hand
-        mp_drawing.draw_landmarks(
-          image,
-          hand_landmarks,
-          mp_hands.HAND_CONNECTIONS,
-          mp_drawing_styles.get_default_hand_landmarks_style(),
-          mp_drawing_styles.get_default_hand_connections_style())
-        
-        # draws circle on finger tip
-        cv2.circle(
-          img = image,
-          center = (int(hand_landmarks.landmark[8].x * image_width),int(hand_landmarks.landmark[8].y * image_height)),
-          radius = 100,
-          color = (70,190,190),
-          thickness = 5
-        )
-        
-        # draws random circles
-        rect_pos = random.randint(100,400)
-        rect_pt1 = None
-        rect_pt2 = None
-        
-        rect_center = (int(hand_landmarks.landmark[8].x * image_width),int(hand_landmarks.landmark[8].y * image_height))
-        
-        if rect_center == rect_pos:
-          cv2.rectangle(
-            img = image,
-            pt1 = (rect_pos+50, rect_pos-50),
-            pt2 = (rect_pos-50, rect_pos+50),
-            color = (190, 70, 70),
-            thickness = -1
-          )
-        
-        
 
+        # left side of screen
+        if x < 480/2:
+          left_hand_y = y
+          left_hand_x = x
+          
+        # right side of screen
+        else:
+          right_hand_y = y
+          right_hand_x = x
+        
+        color = (190,20,0)
+        
+        cv2.circle(image, (left_hand_x,left_hand_y), 10, color, 2)
+        cv2.rectangle(image,(20,left_hand_y),(20,left_hand_y+50), color,3)
+
+        cv2.circle(image, (right_hand_x, right_hand_y), 10, color, 2)
+        cv2.rectangle(image,(460,right_hand_y),(460,right_hand_y+50), color,3)
+        
     # Flip the image horizontally for a selfie-view display.
     cv2.imshow('MediaPipe Hands', cv2.flip(image, 1))
 

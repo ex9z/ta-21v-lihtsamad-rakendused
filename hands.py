@@ -5,7 +5,6 @@ from re import M
 from turtle import color
 import cv2
 import mediapipe as mp
-import random
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -54,7 +53,7 @@ with mp_hands.Hands(
         if x < 480/2:
           left_hand_y = y
           left_hand_x = x
-          
+        
         # right side of screen
         else:
           right_hand_y = y
@@ -67,7 +66,7 @@ with mp_hands.Hands(
 
         cv2.circle(image, (right_hand_x, right_hand_y), 10, color, 2)
         cv2.rectangle(image,(460,right_hand_y),(460,right_hand_y+50), color,3)
-        
+
     # Flip the image horizontally for a selfie-view display.
     cv2.imshow('MediaPipe Hands', cv2.flip(image, 1))
 
